@@ -20,13 +20,18 @@ module Qless
 
         def start
           @concurrency.times do
-            Worker.new_link.work_loop!
+            spawn_worker
           end
         end
 
+        def spawn_worker
+          Worker.new_link.work_loop!
+        end
+
         trap_exit :recover_lost_worker
-        def recover_lost_worker
-          puts "a worker died :/"
+        def recover_lost_worker(actor, reason)
+          puts reason
+          spawn_worker
         end
       end
 
