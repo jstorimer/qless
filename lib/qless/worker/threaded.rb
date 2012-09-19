@@ -59,6 +59,10 @@ module Qless
           if @queues.none?
             raise "No queues provided. You must pass QUEUE or QUEUES when starting a worker."
           end
+          @queues.each do |queue|
+            queue.worker_name = worker_name
+          end
+
 
           @reserver = JobReservers.const_get(ENV.fetch('JOB_RESERVER', 'Ordered')).new(@queues)
           @interval = Float(ENV.fetch('INTERVAL', 5.0))
@@ -71,6 +75,10 @@ module Qless
 
           output.puts "\n\n\n" if verbose || very_verbose
           log "Instantiated Worker"
+        end
+        
+        def worker_name
+          @worker_name ||= [Socket.gethostname, Process.pid, Thread.current.object_id].join('-')
         end
         
         def work_loop
